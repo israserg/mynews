@@ -8,6 +8,7 @@
     body { font-family: system-ui, sans-serif; max-width: 720px; margin: 2rem auto; padding: 0 1rem; color: #222; }
     header { display: flex; justify-content: space-between; align-items: baseline; }
     small { color: #777; }
+    .meta { display: flex; flex-wrap: wrap; gap: .5rem; }
     article { border-bottom: 1px solid #eee; padding: 1rem 0; }
     article h2 { font-size: 1rem; margin: 0 0 .25rem; }
     article a { color: #0b57d0; text-decoration: none; }
@@ -18,7 +19,7 @@
 <body>
   <header>
     <h1>mynews: AI TL;DR</h1>
-    <small id="version"></small>
+    <div class="meta"><small id="count"></small><small id="version"></small></div>
   </header>
   <main id="news">Loading...</main>
   <script>
@@ -46,6 +47,7 @@
           el.append(h, ul);
           box.appendChild(el);
         }
+        document.getElementById("count").textContent = items.length + (items.length === 1 ? " item" : " items");
       } catch (e) {
         box.textContent = "Could not load news: " + e.message;
       }
