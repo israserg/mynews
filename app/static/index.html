@@ -5,15 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>mynews</title>
   <style>
-    body { font-family: system-ui, sans-serif; max-width: 720px; margin: 2rem auto; padding: 0 1rem; color: #222; }
+    body { font-family: system-ui, sans-serif; max-width: 960px; margin: 2rem auto; padding: 0 1rem; color: #222; }
     header { display: flex; justify-content: space-between; align-items: baseline; }
     small { color: #777; }
     .meta { display: flex; flex-wrap: wrap; gap: .5rem; }
-    article { border-bottom: 1px solid #eee; padding: 1rem 0; }
-    article h2 { font-size: 1rem; margin: 0 0 .25rem; }
-    article a { color: #0b57d0; text-decoration: none; }
-    .date { color: #777; font-size: .85rem; }
-    .topics { margin: .5rem 0 0; padding-left: 1.2rem; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { text-align: left; padding: .5rem; border-bottom: 1px solid #eee; vertical-align: top; overflow-wrap: anywhere; }
+    th { color: #777; font-weight: 600; }
+    td:first-child { white-space: nowrap; }
+    a { color: #0b57d0; text-decoration: none; }
   </style>
 </head>
 <body>
@@ -30,23 +30,32 @@
         if (!res.ok) throw new Error("HTTP " + res.status);
         const items = await res.json();
         box.innerHTML = "";
+        const table = document.createElement("table");
+        const thead = document.createElement("thead");
+        const headRow = document.createElement("tr");
+        for (const label of ["Date", "Topics", "Link"]) {
+          const th = document.createElement("th");
+          th.textContent = label;
+          headRow.appendChild(th);
+        }
+        thead.appendChild(headRow);
+        const tbody = document.createElement("tbody");
         for (const it of items) {
-          const el = document.createElement("article");
-          const h = document.createElement("h2");
+          const tr = document.createElement("tr");
+          const tdDate = document.createElement("td");
+          tdDate.textContent = it.published ? new Date(it.published).toDateString() : "-";
+          const tdTopics = document.createElement("td");
+          tdTopics.textContent = it.topics.join(", ");
+          const tdLink = document.createElement("td");
           const a = document.createElement("a");
           a.href = it.link; a.target = "_blank"; a.rel = "noopener";
-          a.textContent = it.published ? new Date(it.published).toDateString() : "Issue";
-          h.appendChild(a);
-          const ul = document.createElement("ul");
-          ul.className = "topics";
-          for (const t of it.topics) {
-            const li = document.createElement("li");
-            li.textContent = t;
-            ul.appendChild(li);
-          }
-          el.append(h, ul);
-          box.appendChild(el);
+          a.textContent = it.title || "Open";
+          tdLink.appendChild(a);
+          tr.append(tdDate, tdTopics, tdLink);
+          tbody.appendChild(tr);
         }
+        table.append(thead, tbody);
+        box.appendChild(table);
         document.getElementById("count").textContent = items.length + (items.length === 1 ? " item" : " items");
       } catch (e) {
         box.textContent = "Could not load news: " + e.message;
