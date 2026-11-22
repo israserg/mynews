@@ -3,6 +3,7 @@ import html
 import os
 import re
 import time
+from urllib.parse import urlparse
 
 import feedparser
 import httpx
@@ -39,17 +40,33 @@ def _extract_together_with(text: str) -> dict | None:
     }
 
 
+def _is_tldr_issue_url(url: str) -> bool:
+    parts = urlparse(url)
+    return parts.scheme == "https" and parts.hostname == "tldr.tech"
+
+
+def _fetch_together_with(issue_url: str) -> dict | None:
+    """Fetch the issue HTML page and extract its "Together With" block; None on any failure."""
+    if not _is_tldr_issue_url(issue_url):
+        return None
+    try:
+        resp = httpx.get(issue_url, timeout=15, follow_redirects=True)
+        resp.raise_for_status()
+        return _extract_together_with(resp.text)
+    except Exception:
+        return None
+
+
 def _to_item(entry) -> dict:
     title = entry.get("title", "").strip()
     # TLDR headlines look like "Topic A 🚀, Topic B 🌍, Topic C 🔬" - split into topics.
     topics = [t.strip() for t in title.split(", ") if t.strip()]
-    source = entry.get("summary", "") or (entry.get("content") or [{}])[0].get("value", "")
     return {
         "title": title,
         "topics": topics,
         "link": entry.get("link", ""),
         "published": entry.get("published", ""),
-        "together_with": _extract_together_with(source),
+        "together_with": None,
     }
 
 
@@ -57,7 +74,10 @@ def fetch_news() -> list[dict]:
     resp = httpx.get(FEED_URL, timeout=15, follow_redirects=True)
     resp.raise_for_status()
     parsed = feedparser.parse(resp.content)
-    return [_to_item(e) for e in parsed.entries[:MAX_ITEMS]]
+    items = [_to_item(e) for e in parsed.entries[:MAX_ITEMS]]
+    for item in items:
+        item["together_with"] = _fetch_together_with(item["link"])
+    return items
 
 
 def get_news() -> list[dict]:

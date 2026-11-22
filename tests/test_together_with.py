@@ -18,20 +18,20 @@ def test_news_items_have_together_with_key(client):
     assert items
     for it in items:
         assert "together_with" in it
-        tw = it["together_with"]
-        if tw is not None:
-            assert isinstance(tw, dict)
-            assert isinstance(tw["logo"], str)
-            assert isinstance(tw["link"], str)
+
+
+def test_together_with_is_populated_for_some_item(client):
+    items = client.get("/api/news").json()
+    assert any(it["together_with"] and it["together_with"]["link"] for it in items)
 
 
 def test_together_with_urls_are_http(client):
-    for it in client.get("/api/news").json():
-        tw = it["together_with"]
-        if tw is None:
-            continue
-        for key in ("link", "logo"):
-            assert tw[key] == "" or tw[key].startswith("http")
+    items = client.get("/api/news").json()
+    twl = [it["together_with"] for it in items if it["together_with"]]
+    assert twl
+    for tw in twl:
+        assert tw["link"].startswith("http")
+        assert tw["logo"] == "" or tw["logo"].startswith("http")
 
 
 def test_index_has_together_with_header(client):
