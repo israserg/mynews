@@ -3,21 +3,26 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
   <title>mynews</title>
   <style>
-    body { font-family: system-ui, sans-serif; max-width: 960px; margin: 2rem auto; padding: 0 1rem; color: #222; }
-    header { display: flex; justify-content: space-between; align-items: baseline; }
-    small { color: #777; }
+    body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; background: #f5f6f8; max-width: 960px; margin: 2rem auto; padding: 0 1rem; color: #1f2328; }
+    header { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: .5rem; padding: 0 0 1rem; margin-bottom: 1.5rem; border-bottom: 1px solid #d0d7de; }
+    h1 { color: #ff00ff; margin: 0; font-size: 1.6rem; }
+    small { color: #6b7280; }
     .meta { display: flex; flex-wrap: wrap; gap: .5rem; }
+    main#news { background: #fff; border-radius: 10px; box-shadow: 0 1px 3px rgba(0, 0, 0, .08), 0 4px 16px rgba(0, 0, 0, .06); overflow: hidden; }
     table { width: 100%; border-collapse: collapse; }
-    th, td { text-align: left; padding: .5rem; border: 1px solid #999; vertical-align: top; overflow-wrap: anywhere; }
-    th { color: #777; font-weight: 600; }
-    td { background: #f4f7fb; }
-    tbody tr:nth-child(odd) td { background: #f2f2f2; }
-    tbody tr:nth-child(even) td { background: #e0e0e0; }
+    th, td { text-align: left; padding: .6rem .75rem; border: 1px solid #d0d7de; vertical-align: top; overflow-wrap: anywhere; }
+    th { color: #57606a; font-weight: 600; font-size: .8rem; text-transform: uppercase; letter-spacing: .04em; background: #f6f8fa; }
+    td { background: #fff; }
+    tbody tr:nth-child(odd) td { background: #f6f6f6; }
+    tbody tr:nth-child(even) td { background: #ececec; }
+    tbody tr:hover td { background: #e2e8f0; }
     td:first-child { white-space: nowrap; }
-    a { color: #0b57d0; text-decoration: none; }
-    h1 { color: #ff00ff; }
+    .chip { display: inline-block; margin: .1rem .3rem .1rem 0; padding: .1rem .6rem; font-size: .8rem; line-height: 1.5; border: 1px solid #c9d3df; border-radius: 999px; background: #fff; color: #374151; }
+    a { color: #0b57d0; text-decoration: none; font-weight: 600; }
+    a:hover { text-decoration: underline; }
   </style>
 </head>
 <body>
@@ -49,7 +54,12 @@
           const tdDate = document.createElement("td");
           tdDate.textContent = it.published ? new Date(it.published).toDateString() : "-";
           const tdTopics = document.createElement("td");
-          tdTopics.textContent = it.topics.join(", ");
+          for (const topic of it.topics) {
+            const chip = document.createElement("span");
+            chip.className = "chip";
+            chip.textContent = topic;
+            tdTopics.appendChild(chip);
+          }
           const tdLink = document.createElement("td");
           const a = document.createElement("a");
           a.href = it.link; a.target = "_blank"; a.rel = "noopener";
