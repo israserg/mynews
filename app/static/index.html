@@ -37,7 +37,7 @@
         const table = document.createElement("table");
         const thead = document.createElement("thead");
         const headRow = document.createElement("tr");
-        for (const label of ["Date", "Topics", "Link"]) {
+        for (const label of ["Date", "Topics", "Link", "Together With"]) {
           const th = document.createElement("th");
           th.textContent = label;
           headRow.appendChild(th);
@@ -55,7 +55,23 @@
           a.href = it.link; a.target = "_blank"; a.rel = "noopener";
           a.textContent = it.title || "Open";
           tdLink.appendChild(a);
-          tr.append(tdDate, tdTopics, tdLink);
+          const tdTogether = document.createElement("td");
+          const tw = it.together_with;
+          if (tw && tw.link) {
+            const twa = document.createElement("a");
+            twa.href = tw.link; twa.target = "_blank"; twa.rel = "noopener";
+            if (tw.logo) {
+              const img = document.createElement("img");
+              img.src = tw.logo; img.alt = ""; img.height = 24; img.loading = "lazy";
+              twa.appendChild(img);
+            } else {
+              twa.textContent = "link";
+            }
+            tdTogether.appendChild(twa);
+          } else {
+            tdTogether.textContent = "-";
+          }
+          tr.append(tdDate, tdTopics, tdLink, tdTogether);
           tbody.appendChild(tr);
         }
         table.append(thead, tbody);
