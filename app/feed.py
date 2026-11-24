@@ -3,6 +3,7 @@ import html
 import os
 import re
 import time
+from email.utils import parsedate_to_datetime
 from urllib.parse import urlparse
 
 import feedparser
@@ -61,11 +62,17 @@ def _to_item(entry) -> dict:
     title = entry.get("title", "").strip()
     # TLDR headlines look like "Topic A 🚀, Topic B 🌍, Topic C 🔬" - split into topics.
     topics = [t.strip() for t in title.split(", ") if t.strip()]
+    published = entry.get("published", "")
+    try:
+        weekday = parsedate_to_datetime(published).strftime("%A")
+    except Exception:
+        weekday = ""
     return {
         "title": title,
         "topics": topics,
         "link": entry.get("link", ""),
-        "published": entry.get("published", ""),
+        "published": published,
+        "weekday": weekday,
         "together_with": None,
     }
 
